@@ -3,10 +3,6 @@ var canvas = {
     "height": "480",
 }
 
-var cursor = {
-    "default": "pointer",
-}
-
 var myCanvas = document.getElementById("main-canvas"),
     myContext = myCanvas.getContext("2d"),
     tool;
@@ -25,6 +21,7 @@ function init(){
 
 function changeWeight(event){
     myContext.lineWidth = document.getElementById("weight").value;
+    socket.emit("change width", myContext.lineWidth);
 }
 
 function getMousePosition(event){
@@ -60,6 +57,7 @@ function handleDraw(event){
     document.coordination.posy.value = event.rY;
     if(tool[event.type]){
         tool[event.type](event);
+        socket.emit(event.type, event);
     }
 }
 
@@ -84,6 +82,19 @@ function Drawtool(){
         }
     }
 }
+
+socket.on("recive mousedown", function(event){
+    tool.mousedown(event);
+});
+socket.on("recive mousemove", function(event){
+    tool.mousemove(event);
+});
+socket.on("recive mouseup", function(event){
+    tool.mouseup(event);
+});
+socket.on("recive change width", function(width){
+    myContext.lineWidth = width;
+});
 
 init();
 

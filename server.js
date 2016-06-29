@@ -12,7 +12,18 @@ app.get("/", function(req, res){
 });
 
 io.on("connection", function(socket){
-    console.log("a user connected!");
+    socket.on("mousedown", function(msg){
+        socket.broadcast.emit("recive mousedown", msg);
+    });
+    socket.on("mousemove", function(msg){
+        socket.broadcast.emit("recive mousemove", msg);
+    });
+    socket.on("mouseup", function(msg){
+        socket.broadcast.emit("recive mouseup", msg);
+    });
+    socket.on("change width", function(msg){
+        socket.broadcast.emit("recive change width", msg);
+    });
 });
 
 http.listen(port, function(){

@@ -15,7 +15,7 @@
         </header>
         <main class="container">
             <form name="coordination" class="row">
-                POSX: <input type="text" name="posx">POSY: <input type="text" name="posy"><br>
+                POSX: <input type="text" name="posx" id="posx">POSY: <input type="text" name="posy"><br>
             </form>
             <canvas id="main-canvas" class="outline" class="row"></canvas>
             <div class="row">
@@ -29,9 +29,9 @@
                 </select>
             </div>
         </main>
-        <script src="./js/canvas.js"></script>
         <script>
             var socket = io();
         </script>
+        <script src="./js/canvas.js"></script>
     </body>
 </html>
