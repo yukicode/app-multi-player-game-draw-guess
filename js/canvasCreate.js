@@ -15,6 +15,17 @@ $("main").append(myCanvas);
 $("canvas").attr("id", canvas.id);
 $("canvas").addClass("outline");
 
+myCanvas = document.getElementById("main-canvas");
+var myContext = myCanvas.getContext("2d");
+var tool;
+//add event listener
+function init(){
+    tool = new Drawtool();
+    document.getElementById("main-canvas").addEventListener("mousemove", handleDraw, false);
+    document.getElementById("main-canvas").addEventListener("mousedown", handleDraw, false);
+    document.getElementById("main-canvas").addEventListener("mouseup", handleDraw, false);
+}
+
 function getMousePosition(event){
     // If pageX/Y aren't available and clientX/Y are,
     // calculate pageX/Y - logic taken from jQuery.
@@ -38,17 +49,51 @@ function getMousePosition(event){
 }
 
 function handleMouseMove(event) {
-    var rect, coord;
+    var coord;
     event = event || window.event;
-    //rect = document.getElementById("main-canvas").getBoundingClientRect();
     coord = getMousePosition(event);
     document.form1.posx.value = coord.X;
     document.form1.posy.value = coord.Y;
     $("#main-canvas").attr("style","cursor: pointer");
-    
 }
 
-//add event listener
-document.getElementById("main-canvas").addEventListener("mousemove", handleMouseMove, false);
+function handleDraw(event){
+    var rect, coord;
+    event = event || window.event;
+    rect = myCanvas.getBoundingClientRect();
+    coord = getMousePosition(event);
+    event.rX = coord.X - rect.left;
+    event.rY = coord.Y - rect.top;
+    document.form1.posx.value = event.rX;
+    document.form1.posy.value = event.rY;
+    if(tool[event.type]){
+        tool[event.type](event);
+    }
+}
+
+function Drawtool(){
+    var tool = this;
+    this.started = false;
+    this.mousedown = function(event){
+        myContext.beginPath();
+        myContext.moveTo(event.rX, event.rY);
+        tool.started = true;
+    }
+    this.mousemove = function(event){
+        if(tool.started){
+            myContext.lineTo(event.rX, event.rY);
+            myContext.stroke();
+        }
+    }
+    this.mouseup = function(event){
+        if(tool.started){
+            tool.mousemove(event);
+            tool.started = false;
+        }
+    }
+}
+
+init();
+
 
 
