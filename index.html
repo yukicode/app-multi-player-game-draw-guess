@@ -14,11 +14,15 @@
             <h1 class="text-center">Canvas!</h1>
         </header>
         <main class="container">
-            <div id="username-form">
+            <div id="username-form" class="row">
                 <label for="username-input">User Name</label>
                 <input type="text" class="form-control" id="username-input" placeholder="Enter Name">
+                <button type="button" class="btn btn-primary">Submit</button>
             </div>
-            <div id="result">
+            <div id="user-list" class="row">
+            </div>
+            <div class="row hide" id="ready">
+                <button type="button" class="btn btn-primary" id="send-ready">Ready</button>
             </div>
         </main>
         <script>

@@ -9,11 +9,12 @@ var userCount = 0;
 var userLimit = 4;
 var userArray = [undefined, undefined, undefined, undefined];
 var nextFill = 0;
+var currentDrawer;
 
 var User = function(name){
-    this.isDrawer = false;
     this.isReady = false;
     this.name = name;
+    this.isDrawer = false;
 }
 
 function addUserToArray(name){
@@ -30,6 +31,17 @@ function addUserToArray(name){
     return nextFill;
 }
 
+//game can start when there are more than 1 user and all users are ready
+function canStartGame(){
+    var canStartGame = userCount > 1 ? true : false ;
+    for(var i=0; i<userLimit; i++){
+        if(userArray[i] && !userArray[i].isReady){
+            canStartGame = false;
+        }
+    }
+    return canStartGame;
+}
+
 app.use(express.static(__dirname));
 
 app.get("/", function(req, res){
@@ -39,6 +51,11 @@ app.get("/", function(req, res){
 io.on("connection", function(socket){
     var addUser = false,
         order;
+
+    //display user-list when user connected
+    socket.emit("user list", userArray);
+
+    //display the canvas while drawer is drawing
     socket.on("mousedown", function(msg){
         socket.broadcast.emit("recive mousedown", msg);
     });
@@ -52,6 +69,9 @@ io.on("connection", function(socket){
         socket.broadcast.emit("recive change width", msg);
     });
 
+    //generator new user when a user enters the game
+    //update user-list
+    //todo: name duplication check
     socket.on("enter game", function(name){
         order = addUserToArray(name);
         if(order != -1){
@@ -60,13 +80,34 @@ io.on("connection", function(socket){
         }else{
             console.log("failed adding user, slots are full");
         }
-        console.log(userArray);
+        io.emit("user list", userArray);
     });
+    //delete user when disconnect
+    //todo: handle disconnection during the game
     socket.on('disconnect', function(){
         if(addUser){
             delete userArray[order];
             userCount--;
-            console.log(userArray);
+            io.emit("user list", userArray);
+        }
+    });
+
+    //update user status when user clicks ready button
+    socket.on("user ready", function(){
+        if(userArray[order]){
+            userArray[order].isReady = true;
+            io.emit("user list", userArray);
+            if(canStartGame()){
+                for(var j=0; j<userLimit; j++){
+                    if(userArray[j]){
+                        userArray[j].isDrawer = true;
+                        currentDrawer = j;
+                        break;
+                    }
+                }
+                io.emit("user list", userArray);
+                io.emit("game start", currentDrawer);
+            }
         }
     });
 });
