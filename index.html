@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+        <script src="./js/bootstrap.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <link rel="stylesheet" href="./css/theme.css">
+        <link rel="stylesheet" href="./css/bootstrap.min.css">
+    </head>
+    <body>
+        <header>
+            <h1 class="text-center">Canvas!</h1>
+        </header>
+        <main class="container">
+            <div id="username-form">
+                <label for="username-input">User Name</label>
+                <input type="text" class="form-control" id="username-input" placeholder="Enter Name">
+            </div>
+            <div id="result">
+            </div>
+        </main>
+        <script>
+            var socket = io();
+        </script>
+        <script src="./js/user.js"></script>
+    </body>
+</html>
