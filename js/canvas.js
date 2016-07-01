@@ -1,5 +1,5 @@
 var canvas = {
-    "width": "512",
+    "width": "800",
     "height": "480",
 }
 
@@ -14,9 +14,15 @@ myCanvas.height = canvas.height.toString();
 function init(){
     tool = new Drawtool();
     document.select-weight.addEventListener("change", changeWeight, false);
-    myCanvas.addEventListener("mousemove", handleDraw, false);
-    myCanvas.addEventListener("mousedown", handleDraw, false);
-    myCanvas.addEventListener("mouseup", handleDraw, false);
+    $("#clear-canvas").click(function(){
+        socket.emit("clear canvas");
+    });
+    //add event listener to mouse for drawer
+    if(_isDrawer === true){
+        myCanvas.addEventListener("mousemove", handleDraw, false);
+        myCanvas.addEventListener("mousedown", handleDraw, false);
+        myCanvas.addEventListener("mouseup", handleDraw, false);
+    }
 }
 
 function changeWeight(event){
@@ -61,6 +67,10 @@ function handleDraw(event){
     }
 }
 
+function clearCanvas(){
+    myContext.clearRect(0, 0, myCanvas.width, myCanvas.height);
+}
+
 function Drawtool(){
     var tool = this;
     this.started = false;
@@ -83,6 +93,10 @@ function Drawtool(){
     }
 }
 
+socket.on("clear canvas", function(){
+    clearCanvas();
+});
+
 socket.on("recive mousedown", function(event){
     tool.mousedown(event);
 });
@@ -95,8 +109,6 @@ socket.on("recive mouseup", function(event){
 socket.on("recive change width", function(width){
     myContext.lineWidth = width;
 });
-
-init();
 
 
 

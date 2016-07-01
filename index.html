@@ -17,17 +17,41 @@
             <div id="username-form" class="row">
                 <label for="username-input">User Name</label>
                 <input type="text" class="form-control" id="username-input" placeholder="Enter Name">
-                <button type="button" class="btn btn-primary">Submit</button>
+                <button type="button" class="btn btn-primary" id="submit-name">Submit</button>
             </div>
             <div id="user-list" class="row">
             </div>
             <div class="row hide" id="ready">
                 <button type="button" class="btn btn-primary" id="send-ready">Ready</button>
             </div>
+            <div class="row hide" id="canvas">
+                <form name="coordination" class="row drawer-only hide">
+                    POSX: <input type="text" name="posx" id="posx">POSY: <input type="text" name="posy"><br>
+                </form>
+                <div class="drawer-only hide" id="word">
+                </div>
+                <canvas id="main-canvas" class="outline" class="row"></canvas>
+                <div class="row hide drawer-only">
+                    <p class="line">Select Weight</p>
+                    <select name="select-weight" id="weight" class="line">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                    <button type="button" class="btn btn-primary" id="clear-canvas">Clear</button>
+                </div>
+                <div id="guess-chat">
+                    <input type="text" class="form-control" id="guess-input" placeholder="Enter Guess">
+                    <p id="judge"></p>
+                </div>
+            </div>
         </main>
         <script>
             var socket = io();
         </script>
         <script src="./js/user.js"></script>
+        <script src="./js/canvas.js"></script>
     </body>
 </html>
