@@ -3,18 +3,26 @@ var name,
     _userArray,
     _isDrawer = false;
 var printUser = '<p>%name% %order% <span class="gray">IsReady</span></p>';
+var printUserImg = '<div class="user-slot col-sm-3"><img src="%data%"><h4 class="text-center">%name%</h4></div>'
 
 function initBoard(){
     $("#submit-name").click(function(){
         name = $("#username-input").val().trim();
         if(name){
             socket.emit("enter game", name);
-            $("#username-form").hide();
-            $("#ready").toggleClass("hide");
+            $("#username-form-div").slideUp();
+            $("#ready-unready").removeClass("hide");
         }
     });
     $("#send-ready").click(function(){
+        $("#send-ready").attr("disabled", "disabled");
+        $("#send-unready").removeAttr("disabled");
         socket.emit("user ready");
+    });
+    $("#send-unready").click(function(){
+        $("#send-unready").attr("disabled", "disabled");
+        $("#send-ready").removeAttr("disabled");
+        socket.emit("user unready");
     });
     $(window).keydown(function(event){
         if (event.which === 13) {
@@ -22,6 +30,10 @@ function initBoard(){
                 sendGuess();
             }
         }
+    });
+    $("#change-word").click(function(){
+        socket.emit("request new word");
+        socket.emit("clear canvas");
     });
 }
 
@@ -41,12 +53,13 @@ function startgame(drawerId){
     if(_userArray[drawerId].name === name){
         _isDrawer = true;
         $(".drawer-only").removeClass("hide");
-        $("#word").append("<p>"+ _word + "</p>");
+        $("#word").text(_word);
     }else{
         _isDrawer = false;
     }
     init();
-    $("#ready").addClass("hide");
+    $("#ready-unready").addClass("hide");
+    $("#title").addClass("hide");
     $("#canvas").removeClass("hide");
 }
 
@@ -54,11 +67,15 @@ socket.on("user list", function(userArray){
     $("#user-list").empty();
     for(var i=0, length = userArray.length; i< length; i++){
         if(userArray[i]){
-            $("#user-list").append(printUser.replace("%name%", userArray[i].name).replace("%order%", i+1));
-            if(userArray[i].isReady){$(".gray:last").attr("class", "green");}
             if(userArray[i].name === name){
-                $("#user-list p:last-child").addClass("red");
+                $("#user-list").append(printUserImg.replace("%data%", "./images/user-red.svg").replace("%name%", userArray[i].name));
+            }else{
+                $("#user-list").append(printUserImg.replace("%data%", "./images/user-blue.svg").replace("%name%", userArray[i].name));
             }
+            if(userArray[i].isReady){$(".user-slot img:last").addClass("ready");}
+            
+        }else{
+            $("#user-list").append(printUserImg.replace("%data%", "./images/empty.svg").replace("%name%", ""));
         }
     }
     _userArray = userArray;
@@ -70,8 +87,18 @@ socket.on("game start", function(msg){
 });
 
 socket.on("back to waiting room", function(){
-    $("#ready").removeClass("hide");
+    $("#ready-unready").removeClass("hide");
+    $("#send-unready").attr("disabled", "disabled");
+    $("#send-ready").removeAttr("disabled");
     $("#canvas").addClass("hide");
+    clearCanvas();
+});
+
+socket.on("get new word", function(newWord){
+    _word = newWord;
+    if(_isDrawer){
+        $("#word").text(_word);
+    }
 });
 
 socket.on("next round", function(){

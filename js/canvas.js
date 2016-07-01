@@ -30,37 +30,14 @@ function changeWeight(event){
     socket.emit("change width", myContext.lineWidth);
 }
 
-function getMousePosition(event){
-    // If pageX/Y aren't available and clientX/Y are,
-    // calculate pageX/Y - logic taken from jQuery.
-    // (This is to support old IE)
-    if (event.pageX == null && event.clientX != null) {
-        eventDoc = (event.target && event.target.ownerDocument) || document;
-        doc = eventDoc.documentElement;
-        body = eventDoc.body;
-
-        event.pageX = event.clientX +
-            (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-            (doc && doc.clientLeft || body && body.clientLeft || 0);
-        event.pageY = event.clientY +
-            (doc && doc.scrollTop  || body && body.scrollTop  || 0) -
-            (doc && doc.clientTop  || body && body.clientTop  || 0 );
-    }
-    return {
-        "X": event.pageX,
-        "Y": event.pageY,
-    };
-}
-
 function handleDraw(event){
     var rect, coord;
     event = event || window.event;
     rect = myCanvas.getBoundingClientRect();
-    coord = getMousePosition(event);
-    event.rX = coord.X - rect.left;
-    event.rY = coord.Y - rect.top;
-    document.coordination.posx.value = event.rX;
-    document.coordination.posy.value = event.rY;
+    event.rX = event.clientX - rect.left;
+    event.rY = event.clientY - rect.top;
+    // document.coordination.posx.value = event.rX;
+    // document.coordination.posy.value = event.rY;
     if(tool[event.type]){
         tool[event.type](event);
         socket.emit(event.type, event);

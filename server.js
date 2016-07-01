@@ -163,6 +163,17 @@ io.on("connection", function(socket){
         }
     });
 
+    socket.on("user unready", function(){
+        if(userArray[order]){
+            userArray[order].isReady = false;
+            io.emit("user list", userArray);
+        }
+    });
+
+    socket.on("request new word", function(){
+        io.emit("get new word", getWord());
+    });
+
     socket.on("clear canvas", function(){
         io.emit("clear canvas");
     });

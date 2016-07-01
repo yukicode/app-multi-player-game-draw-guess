@@ -10,25 +10,35 @@
         <link rel="stylesheet" href="./css/bootstrap.min.css">
     </head>
     <body>
-        <header>
-            <h1 class="text-center">Canvas!</h1>
+        <header class="container">
+            <div class="row" id="title">
+                <h1 class="text-center col-xs-12">CANVAS!</h1>
+            </div>
         </header>
         <main class="container">
-            <div id="username-form" class="row">
-                <label for="username-input">User Name</label>
-                <input type="text" class="form-control" id="username-input" placeholder="Enter Name">
-                <button type="button" class="btn btn-primary" id="submit-name">Submit</button>
+            <div id="username-form-div">
+                <form id="username-form" class="row">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <input type="text" class="form-control" id="username-input" placeholder="Enter Name">
+                    </div>
+                    <div class="text-center col-sm-12">
+                        <button type="button" class="btn btn-primary btn-lg" id="submit-name">Submit</button>
+                    </div>
+                </form>
             </div>
             <div id="user-list" class="row">
             </div>
-            <div class="row hide" id="ready">
-                <button type="button" class="btn btn-primary" id="send-ready">Ready</button>
+            <div class="row hide text-center" id="ready-unready">
+                <button type="button" class="btn btn-primary btn-lg" id="send-ready">Ready</button>
+                <button type="button" class="btn btn-secondary btn-lg" id="send-unready" disabled = "disabled">Wait a Minute...</button>
             </div>
             <div class="row hide" id="canvas">
-                <form name="coordination" class="row drawer-only hide">
+                <!--<form name="coordination" class="row drawer-only hide">
                     POSX: <input type="text" name="posx" id="posx">POSY: <input type="text" name="posy"><br>
-                </form>
-                <div class="drawer-only hide" id="word">
+                </form>-->
+                <div class="drawer-only hide" id="word-div">
+                    <p id="word"></p>
+                    <button type="button" class="btn btn-primary" id="change-word">Change Word</button>
                 </div>
                 <canvas id="main-canvas" class="outline" class="row"></canvas>
                 <div class="row hide drawer-only">
@@ -48,6 +58,9 @@
                 </div>
             </div>
         </main>
+        <footer>
+            <div>Icons made by <a href="http://www.flaticon.com/authors/gregor-cresnar" title="Gregor Cresnar">Gregor Cresnar</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+        </footer>
         <script>
             var socket = io();
         </script>
