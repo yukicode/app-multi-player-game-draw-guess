@@ -1,6 +1,6 @@
 var canvas = {
     "width": "800",
-    "height": "480",
+    "height": "500",
 }
 
 var myCanvas = document.getElementById("main-canvas"),

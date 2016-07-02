@@ -32,29 +32,36 @@
                 <button type="button" class="btn btn-primary btn-lg" id="send-ready">Ready</button>
                 <button type="button" class="btn btn-secondary btn-lg" id="send-unready" disabled = "disabled">Wait a Minute...</button>
             </div>
-            <div class="row hide" id="canvas">
+            <div class="row hide" id="game">
                 <!--<form name="coordination" class="row drawer-only hide">
                     POSX: <input type="text" name="posx" id="posx">POSY: <input type="text" name="posy"><br>
                 </form>-->
-                <div class="drawer-only hide" id="word-div">
-                    <p id="word"></p>
-                    <button type="button" class="btn btn-primary" id="change-word">Change Word</button>
+                <div class="drawer-only hide col-md-12 text-center" id="word-div">
+                    <h4 id="word" class="line"></h4>
+                    <button type="button" class="btn btn-secondary line" id="change-word">Change Word</button>
                 </div>
-                <canvas id="main-canvas" class="outline" class="row"></canvas>
-                <div class="row hide drawer-only">
-                    <p class="line">Select Weight</p>
-                    <select name="select-weight" id="weight" class="line">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                    <button type="button" class="btn btn-primary" id="clear-canvas">Clear</button>
+                <div class="col-md-9" id="drawing-panel">
+                    <canvas id="main-canvas" class="outline" class="row"></canvas>
+                    <div class="row hide drawer-only">
+                        <h4 class="line">Select Weight</h4>
+                        <select name="select-weight" id="weight" class="line">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        <button type="button" class="btn btn-primary" id="clear-canvas">Clear</button>
+                    </div>
                 </div>
-                <div id="guess-chat">
-                    <input type="text" class="form-control" id="guess-input" placeholder="Enter Guess">
-                    <p id="judge"></p>
+                <div class="col-md-3" id="chat-panel">
+                    <div class="message-panel">
+                        <ul id="messages"></ul>
+                    </div>
+                    <div id="guess-chat">
+                        <input type="text" class="form-control" id="guess-input" placeholder="Enter Guess">
+                        <p id="judge"></p>
+                    </div>
                 </div>
             </div>
         </main>

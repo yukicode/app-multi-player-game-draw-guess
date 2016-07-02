@@ -2,7 +2,6 @@ var name,
     _word,
     _userArray,
     _isDrawer = false;
-var printUser = '<p>%name% %order% <span class="gray">IsReady</span></p>';
 var printUserImg = '<div class="user-slot col-sm-3"><img src="%data%"><h4 class="text-center">%name%</h4></div>'
 
 function initBoard(){
@@ -17,6 +16,7 @@ function initBoard(){
     $("#send-ready").click(function(){
         $("#send-ready").attr("disabled", "disabled");
         $("#send-unready").removeAttr("disabled");
+        console.log("emit user ready");
         socket.emit("user ready");
     });
     $("#send-unready").click(function(){
@@ -37,8 +37,21 @@ function initBoard(){
     });
 }
 
+function reset(){
+    clearCanvas();
+    name = "";
+    _word = "";
+    _userArray =[];
+    _isDrawer = false;
+    clearChat();
+}
+
+function clearChat(){
+    $('#messages').empty();
+}
 function sendGuess(){
     var _guess = $("#guess-input").val().trim();
+    socket.emit("guess message", _guess);
     $("#guess-input").val("");
     if(_guess){
         if(_guess === _word){
@@ -59,10 +72,11 @@ function startgame(drawerId){
     }
     init();
     $("#ready-unready").addClass("hide");
-    $("#title").addClass("hide");
-    $("#canvas").removeClass("hide");
+    $("#title").slideUp();
+    $("#game").removeClass("hide");
 }
 
+//update user list
 socket.on("user list", function(userArray){
     $("#user-list").empty();
     for(var i=0, length = userArray.length; i< length; i++){
@@ -87,11 +101,12 @@ socket.on("game start", function(msg){
 });
 
 socket.on("back to waiting room", function(){
-    $("#ready-unready").removeClass("hide");
     $("#send-unready").attr("disabled", "disabled");
     $("#send-ready").removeAttr("disabled");
-    $("#canvas").addClass("hide");
-    clearCanvas();
+    $("#game").addClass("hide");
+    $("#title").slideDown();
+    $("#username-form-div").slideDown();
+    reset();
 });
 
 socket.on("get new word", function(newWord){
@@ -103,6 +118,11 @@ socket.on("get new word", function(newWord){
 
 socket.on("next round", function(){
     //tobe implemented
+});
+
+socket.on("guess message", function(msg){
+    $('#messages').append($('<li>').text(msg.user + ": " + msg.guess));
+    $("#messages")[0].scrollTop = $("#messages")[0].scrollHeight;
 });
 
 initBoard();

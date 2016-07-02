@@ -48,7 +48,7 @@
 }
 
 #user-list {
-    margin: 50px auto;
+    margin: 50px 0 0 0;
 }
 
 .user-slot img {
@@ -65,3 +65,29 @@ footer {
     left: 0;
     position: fixed;
 }
+
+#messages {
+    list-style-type: none; margin: 0; padding: 0; 
+    background-color: lightseagreen;
+}
+#messages li {
+     padding: 5px 10px; 
+}
+#messages li:nth-child(odd) {
+    background: #eee;
+}
+
+#messages {
+    height: 500px;
+    overflow-y: scroll;
+}
+
+#word-div {
+    margin: 0 0 10px 0;
+    border: 2px solid lightseagreen;
+}
+
+#drawing-panel, #chat-panel {
+    padding:0;
+}
+
