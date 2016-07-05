@@ -2,13 +2,13 @@ var name,
     _word,
     _userArray,
     _isDrawer = false;
-var printUserImg = '<div class="user-slot col-sm-3"><img src="%data%"><h4 class="text-center">%name%</h4></div>'
+var printUserImg = '<div class="user-slot col-sm-3"><img class="img-responsive" src="%data%"><h4 class="text-center">%name%</h4></div>'
 
 function initBoard(){
     $("#submit-name").click(function(){
         name = $("#username-input").val().trim();
         if(name){
-            socket.emit("enter game", name);
+            socket.emit("enter name", name);
             $("#username-form-div").slideUp();
             $("#ready-unready").removeClass("hide");
         }
@@ -51,13 +51,21 @@ function clearChat(){
 }
 function sendGuess(){
     var _guess = $("#guess-input").val().trim();
-    socket.emit("guess message", _guess);
-    $("#guess-input").val("");
     if(_guess){
-        if(_guess === _word){
-            $("#judge").text("Guess is correct!");
-        }else{
-            $("#judge").text("Guess is wrong.");
+        socket.emit("guess message", _guess);
+        $("#guess-input").val("");
+    }
+}
+
+function countdown(seconds){
+    if(seconds <0) {return;}
+    var counter = setInterval(timer, 1000);
+    function timer(){
+        seconds--;
+        $("#countdown h4:last").text(seconds);
+        if(seconds <=0){
+            clearInterval(counter);
+            return;
         }
     }
 }
@@ -84,7 +92,7 @@ socket.on("user list", function(userArray){
             if(userArray[i].name === name){
                 $("#user-list").append(printUserImg.replace("%data%", "./images/user-red.svg").replace("%name%", userArray[i].name));
             }else{
-                $("#user-list").append(printUserImg.replace("%data%", "./images/user-blue.svg").replace("%name%", userArray[i].name));
+                $("#user-list").append(printUserImg.replace("%data%", "./images/user-green.svg").replace("%name%", userArray[i].name));
             }
             if(userArray[i].isReady){$(".user-slot img:last").addClass("ready");}
             
@@ -106,6 +114,7 @@ socket.on("back to waiting room", function(){
     $("#game").addClass("hide");
     $("#title").slideDown();
     $("#username-form-div").slideDown();
+    $("#countdown").addClass("hide");
     reset();
 });
 
@@ -123,6 +132,19 @@ socket.on("next round", function(){
 socket.on("guess message", function(msg){
     $('#messages').append($('<li>').text(msg.user + ": " + msg.guess));
     $("#messages")[0].scrollTop = $("#messages")[0].scrollHeight;
+});
+
+socket.on("count down", function(seconds){
+    $("#countdown").removeClass("hide");
+    countdown(seconds);
+});
+
+socket.on("cancel starting game", function(order){
+    if(_userArray[order] === name){
+        $("#send-unready").attr("disabled", "disabled");
+        $("#send-ready").removeAttr("disabled");
+    }
+    $("#countdown").addClass("hide");
 });
 
 initBoard();

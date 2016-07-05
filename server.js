@@ -14,8 +14,15 @@ var userArray = [undefined, undefined, undefined, undefined];
 var nextFill = 0;
 var currentDrawer;
 var currentWord;
-var inGame = false;
+var correctGuess = 0;
+var gameStartCountdown;
+//game status
+//0: not ready
+//1: counting down to start
+//2: in game 
+var gameStatus = 0;
 
+//load words for the game
 fs.readFile("words.txt", "utf8", function(err, data){
     words = data.toString().split("\r\n");
 });
@@ -28,10 +35,11 @@ var User = function(name){
     this.isReady = false;
     this.name = name;
     this.isDrawer = false;
+    this.score = 0;
 }
 
 function addUserToArray(name){
-    if(inGame){ return -1;}
+    if(gameStatus){ return -1;}
     if(userCount === userLimit){
         return -1;
     }
@@ -47,13 +55,25 @@ function addUserToArray(name){
 
 //game can start when there are more than 1 user and all users are ready
 function canStartGame(){
-    var canStartGame = userCount > 1 ? true : false ;
+    var canStartGame = userCount > 1 ? true : false;
     for(var i=0; i<userLimit; i++){
         if(userArray[i] && !userArray[i].isReady){
             canStartGame = false;
         }
     }
     return canStartGame;
+}
+
+function startGame(){
+    currentDrawer = assignDrawer();
+    currentWord = getWord();
+    io.emit("user list", userArray);
+    io.emit("count down", 5);
+    gameStatus = 1;
+    gameStartCountdown = setTimeout(function(){
+        io.emit("game start", {"drawerId": currentDrawer, "word": currentWord});
+        gameStatus = 2;
+    }, 5000);
 }
 
 function assignDrawer(){
@@ -88,12 +108,6 @@ function assignDrawer(){
     return gussers[0];
 }
 
-function unreadyUser(){
-    for(var i=0; i<userCount; i++){
-        if(userArray[i]){userArray[i].isReady = false;}
-    }
-}
-
 function reset(){
     userCount = 0;
     userLimit = 4;
@@ -101,13 +115,8 @@ function reset(){
     nextFill = 0;
     currentDrawer;
     currentWord;
+    correctGuess=0;
 }
-
-app.use(express.static(__dirname));
-
-app.get("/", function(req, res){
-    res.sendFile(__dirname + "/index.html");
-});
 
 io.on("connection", function(socket){
     var addUser = false,
@@ -133,7 +142,7 @@ io.on("connection", function(socket){
     //generator new user when a user enters the game
     //update user-list
     //todo: name duplication check
-    socket.on("enter game", function(name){
+    socket.on("enter name", function(name){
         order = addUserToArray(name);
         if(order != -1){
             addUser = true;
@@ -143,50 +152,58 @@ io.on("connection", function(socket){
         }
         io.emit("user list", userArray);
     });
+
     //delete user when disconnect
     //todo: handle disconnection during the game
     socket.on('disconnect', function(){
         if(addUser){
-            if(userCount === 2 && inGame){
+            if(gameStatus === 2 && userCount === 2){
                 reset();
                 addUser = false;
                 order = -1;
-                inGame = false;
+                gameStatus = 0;
                 io.emit("back to waiting room");
-            }else if(userArray[order].isDrawer && inGame){
+            }else if(gameStatus === 2 && userArray[order].isDrawer){
                 currentDrawer = assignDrawer();
                 delete userArray[order];
                 userCount--;
                 io.emit("next round", currentDrawer);
             }else{
+                if(gameStatus === 1){
+                    clearTimeout(gameStartCountdown);
+                    gameStatus = 0;
+                }
                 delete userArray[order];
                 userCount--;
+                if(canStartGame()){
+                    startGame();
+                }
             }
             io.emit("user list", userArray);
         }
     });
 
     //update user status when user clicks ready button
+    //start game when all users are ready and there are two or more players
     socket.on("user ready", function(){
         if(userArray[order]){
             userArray[order].isReady = true;
             io.emit("user list", userArray);
             if(canStartGame()){
-                setTimeout(function(){
-                    currentDrawer = assignDrawer();
-                    currentWord = getWord();
-                    io.emit("user list", userArray);
-                    io.emit("game start", {"drawerId": currentDrawer, "word": currentWord});
-                    inGame = true;
-                }, 5000);
+                startGame();
             }
         }
     });
 
     socket.on("user unready", function(){
         if(userArray[order]){
+            if(gameStatus === 1){
+                clearTimeout(gameStartCountdown);
+                gameStatus = 0;
+            }
             userArray[order].isReady = false;
             io.emit("user list", userArray);
+            io.emit("cancel starting game", order);
         }
     });
 
@@ -199,8 +216,24 @@ io.on("connection", function(socket){
     });
 
     socket.on("guess message", function(guess){
-        io.emit("guess message", {"guess": guess, "user": userArray[order].name});
+        if(currentWord === guess.toLowerCase()){
+            io.emit("guess message", {"guess": "IS CORRECT!", "user": userArray[order].name});
+            if(++correctGuess === userCount-1){
+                currentDrawer = assignDrawer();
+                correctGuess = 0;
+                currentWord = "";
+                io.emit("next round", currentDrawer);
+            }
+        }else{
+            io.emit("guess message", {"guess": guess, "user": userArray[order].name});
+        }
     });
+});
+
+app.use(express.static(__dirname));
+
+app.get("/", function(req, res){
+    res.sendFile(__dirname + "/index.html");
 });
 
 http.listen(port, "192.168.1.88", function(){

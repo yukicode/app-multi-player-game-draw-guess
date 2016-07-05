@@ -32,10 +32,10 @@
                 <button type="button" class="btn btn-primary btn-lg" id="send-ready">Ready</button>
                 <button type="button" class="btn btn-secondary btn-lg" id="send-unready" disabled = "disabled">Wait a Minute...</button>
             </div>
+            <div id="countdown" class="row text-center hide">
+                <h4></h4>
+            </div>
             <div class="row hide" id="game">
-                <!--<form name="coordination" class="row drawer-only hide">
-                    POSX: <input type="text" name="posx" id="posx">POSY: <input type="text" name="posy"><br>
-                </form>-->
                 <div class="drawer-only hide col-md-12 text-center" id="word-div">
                     <h4 id="word" class="line"></h4>
                     <button type="button" class="btn btn-secondary line" id="change-word">Change Word</button>
@@ -60,7 +60,6 @@
                     </div>
                     <div id="guess-chat">
                         <input type="text" class="form-control" id="guess-input" placeholder="Enter Guess">
-                        <p id="judge"></p>
                     </div>
                 </div>
             </div>
