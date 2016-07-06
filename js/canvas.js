@@ -11,18 +11,24 @@ myCanvas.width = canvas.width.toString();
 myCanvas.height = canvas.height.toString();
 
 //add event listener
-function init(){
+function initCanvas(){
     tool = new Drawtool();
     document.select-weight.addEventListener("change", changeWeight, false);
     $("#clear-canvas").click(function(){
         socket.emit("clear canvas");
     });
-    //add event listener to mouse for drawer
-    if(_isDrawer === true){
-        myCanvas.addEventListener("mousemove", handleDraw, false);
-        myCanvas.addEventListener("mousedown", handleDraw, false);
-        myCanvas.addEventListener("mouseup", handleDraw, false);
-    }
+}
+
+function addCanvasListeners(){
+    myCanvas.addEventListener("mousemove", handleDraw, false);
+    myCanvas.addEventListener("mousedown", handleDraw, false);
+    myCanvas.addEventListener("mouseup", handleDraw, false);
+}
+
+function removeCanvasListeners(){
+    myCanvas.removeEventListener("mousemove", handleDraw, false);
+    myCanvas.removeEventListener("mousedown", handleDraw, false);
+    myCanvas.removeEventListener("mouseup", handleDraw, false);
 }
 
 function changeWeight(event){

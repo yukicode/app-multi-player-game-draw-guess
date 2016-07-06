@@ -16,6 +16,8 @@ var currentDrawer;
 var currentWord;
 var correctGuess = 0;
 var gameStartCountdown;
+var gameRoundCountdown;
+var roundCount = 0;
 //game status
 //0: not ready
 //1: counting down to start
@@ -67,6 +69,8 @@ function canStartGame(){
 function startGame(){
     currentDrawer = assignDrawer();
     currentWord = getWord();
+    roundCount = 0;
+    correctGuess = 0;
     io.emit("user list", userArray);
     io.emit("count down", 5);
     gameStatus = 1;
@@ -74,6 +78,22 @@ function startGame(){
         io.emit("game start", {"drawerId": currentDrawer, "word": currentWord});
         gameStatus = 2;
     }, 5000);
+}
+
+function newRoundSetUp(){
+    currentDrawer = assignDrawer();
+    currentWord = getWord();
+    correctGuess = 0;
+    clearTimeout(gameRoundCountdown);
+    //this is the last round, game ends, reset everything
+    if(roundCount > 1){
+        reset();
+        gameStatus = 0;
+        io.emit("back to waiting room");
+    } else { //get new drawer, get new word, emit signal to the players
+        io.emit("start new round", {"drawerId": currentDrawer, "word": currentWord});
+    }
+    io.emit("user list", userArray);
 }
 
 function assignDrawer(){
@@ -100,9 +120,10 @@ function assignDrawer(){
         for(var j=0, l=gussers.length; j< l; j++){
             if(gussers[j]>drawers[0]){
                 userArray[gussers[j]].isDrawer = true;
-                return j;
+                return gussers[j];
             }
         }
+        roundCount++;
     }
     userArray[gussers[0]].isDrawer = true;
     return gussers[0];
@@ -115,7 +136,8 @@ function reset(){
     nextFill = 0;
     currentDrawer;
     currentWord;
-    correctGuess=0;
+    correctGuess = 0;
+    roundCount = 0;
 }
 
 io.on("connection", function(socket){
@@ -159,15 +181,12 @@ io.on("connection", function(socket){
         if(addUser){
             if(gameStatus === 2 && userCount === 2){
                 reset();
-                addUser = false;
-                order = -1;
                 gameStatus = 0;
                 io.emit("back to waiting room");
             }else if(gameStatus === 2 && userArray[order].isDrawer){
-                currentDrawer = assignDrawer();
                 delete userArray[order];
                 userCount--;
-                io.emit("next round", currentDrawer);
+                newRoundSetUp();
             }else{
                 if(gameStatus === 1){
                     clearTimeout(gameStartCountdown);
@@ -219,14 +238,17 @@ io.on("connection", function(socket){
         if(currentWord === guess.toLowerCase()){
             io.emit("guess message", {"guess": "IS CORRECT!", "user": userArray[order].name});
             if(++correctGuess === userCount-1){
-                currentDrawer = assignDrawer();
-                correctGuess = 0;
-                currentWord = "";
-                io.emit("next round", currentDrawer);
+                newRoundSetUp();
             }
         }else{
             io.emit("guess message", {"guess": guess, "user": userArray[order].name});
         }
+    });
+
+    socket.on("start round", function(){
+        gameRoundCountdown = setTimeout(function(){
+            newRoundSetUp();
+        }, 60000);
     });
 });
 

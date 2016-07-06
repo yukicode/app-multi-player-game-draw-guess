@@ -1,7 +1,8 @@
 var name,
     _word,
     _userArray,
-    _isDrawer = false;
+    _isDrawer = false,
+    counter;
 var printUserImg = '<div class="user-slot col-sm-3"><img class="img-responsive" src="%data%"><h4 class="text-center">%name%</h4></div>'
 
 function initBoard(){
@@ -16,7 +17,6 @@ function initBoard(){
     $("#send-ready").click(function(){
         $("#send-ready").attr("disabled", "disabled");
         $("#send-unready").removeAttr("disabled");
-        console.log("emit user ready");
         socket.emit("user ready");
     });
     $("#send-unready").click(function(){
@@ -37,6 +37,13 @@ function initBoard(){
     });
 }
 
+function print(){
+    console.log("name: " + name);
+    console.log("_word: " + _word);
+    console.log("_isDrawer: " + _isDrawer);
+    console.log("_userArray: " + _userArray);
+}
+
 function reset(){
     clearCanvas();
     name = "";
@@ -44,6 +51,7 @@ function reset(){
     _userArray =[];
     _isDrawer = false;
     clearChat();
+    if(counter) { clearInterval(counter); }
 }
 
 function clearChat(){
@@ -59,26 +67,35 @@ function sendGuess(){
 
 function countdown(seconds){
     if(seconds <0) {return;}
-    var counter = setInterval(timer, 1000);
+    $("#countdown h4:last").text(seconds);
+    counter = setInterval(timer, 1000);
     function timer(){
         seconds--;
         $("#countdown h4:last").text(seconds);
-        if(seconds <=0){
+        if(counter && seconds <=0){
             clearInterval(counter);
             return;
         }
     }
 }
 
-function startgame(drawerId){
+function startRound(drawerId){
     if(_userArray[drawerId].name === name){
         _isDrawer = true;
+        addCanvasListeners();
         $(".drawer-only").removeClass("hide");
         $("#word").text(_word);
+        socket.emit("start round");
     }else{
         _isDrawer = false;
     }
-    init();
+    if(counter) { clearInterval(counter); }
+    countdown(60);
+}
+
+function startgame(drawerId){
+    startRound(drawerId);
+    initCanvas();
     $("#ready-unready").addClass("hide");
     $("#title").slideUp();
     $("#game").removeClass("hide");
@@ -125,10 +142,6 @@ socket.on("get new word", function(newWord){
     }
 });
 
-socket.on("next round", function(){
-    //tobe implemented
-});
-
 socket.on("guess message", function(msg){
     $('#messages').append($('<li>').text(msg.user + ": " + msg.guess));
     $("#messages")[0].scrollTop = $("#messages")[0].scrollHeight;
@@ -145,6 +158,17 @@ socket.on("cancel starting game", function(order){
         $("#send-ready").removeAttr("disabled");
     }
     $("#countdown").addClass("hide");
+});
+
+socket.on("start new round", function(msg){
+    clearChat();
+    socket.emit("clear canvas");
+    if(_isDrawer){
+        removeCanvasListeners();
+        $(".drawer-only").addClass("hide");
+    }
+    _word = msg.word;
+    startRound(msg.drawerId);
 });
 
 initBoard();
